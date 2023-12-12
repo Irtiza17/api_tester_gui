@@ -21,7 +21,8 @@ def make_request():
             params = json.loads(request.form.get('params', '{}'))
             data_body = json.loads(request.form.get('data', '{}'))
             authentication = json.loads(request.form.get('auth', '{}'))
-            print(authentication)
+            print('initial authentication: ',authentication)
+            print('initial headers: ',headers)
             # auth = request.authorization
             if "Bearer Token" in authentication:
                 headers['Authorization'] = f"Bearer {authentication['Bearer Token']}"
