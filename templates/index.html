@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JP REQUEST BUILDER</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+
+        #request-form {
+            max-width: 600px;
+            margin: 50px auto;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        label span {
+            color: red;
+            font-size: 10px;
+            margin-left: 5px;
+        }
+
+        input, textarea {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 15px;
+            box-sizing: border-box;
+        }
+        select {
+            margin-bottom: 15px;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            cursor: pointer;
+        }
+
+        #response {
+            margin-top: 20px;
+            padding: 10px;
+            border: 1px solid #ddd;
+        }
+
+        #data {
+            height: 150px; /* Adjust the value as needed */
+            resize: none; /* Prevent resizing */
+        }
+    </style>
+</head>
+<body>
+<h5 style="color: red;">The values in Headers,Parameters,Data & Authentication should be in JSON type format i.e. {"key1":"value1","key2":"value2"}</h5>
+<div id="request-form">
+    <label for="url">URL:<span style="color: red;">Don't forget to write the 'http://' part</span></label>
+    <input type="text" id="url" placeholder="Enter URL">
+    
+    <label for="method">Method:</label>
+    <select id="method">
+        <option value="GET">GET</option>
+        <option value="POST">POST</option>
+        <option value="PUT">PUT</option>
+        <option value="DELETE">DELETE</option>
+    </select>
+
+    <label for="headers">Headers:<span style="color: red;">Example: {
+        "Content-Type": "application/x-www-form-urlencoded"}, </span></label>
+    <textarea id="headers" placeholder="Enter headers in JSON format"></textarea>
+        
+    <label for="params">Parameters:</label>
+    <textarea id="params" placeholder="Enter parameters in JSON format"></textarea>
+    
+    <label for="data">Body Data:<span style="color: red;">{"key1":"value1"}</span></label>
+    <input type="file" id="file" accept="*/*">
+    <textarea id="data" placeholder="Enter data"></textarea>
+
+
+    <label for="auth-type">Authorization Type:</label>
+    <select id="auth-type" onchange="updateAuthPlaceholder()">
+        <option value="None">None</option>
+        <option value="Bearer Token">Bearer Token</option>
+        <option value="Basic Auth">Basic Auth</option>
+    </select>
+    <label for="auth-value">Authorization Value:</label>
+    <textarea id="auth-value" placeholder="Enter authorization value"></textarea>
+
+
+<!-- 
+    <label for="auth">Authentication:</label>
+    <textarea id="auth" placeholder="Enter authentication credentials in JSON format"></textarea> -->
+
+    <button onclick="makeRequest()">Send Request</button>
+</div>
+
+<div id="response">
+    <h3>Response:</h3>
+    <pre id="response-content"></pre>
+</div>
+
+<script>
+    function updateAuthPlaceholder() {
+        const authType = document.getElementById('auth-type').value;
+        const authValueTextarea = document.getElementById('auth-value');
+        
+        // Set the placeholder text based on the selected authorization type
+        switch (authType) {
+            case 'None':
+                authValueTextarea.placeholder = '';
+                break;
+            case 'Bearer Token':
+                authValueTextarea.placeholder = 'Enter Bearer Token';
+                break;
+            case 'Basic Auth':
+                authValueTextarea.placeholder = 'Enter Basic Auth';
+                break;
+            default:
+                authValueTextarea.placeholder = '';
+                break;
+        }
+    }
+    function makeRequest() {
+    const pythonServiceUrl = '/make_request';
+    const url = document.getElementById('url').value;
+    const method = document.getElementById('method').value;
+    const headers = JSON.parse(document.getElementById('headers').value || '{}');
+    const params = JSON.parse(document.getElementById('params').value || '{}');
+    const data = JSON.parse(document.getElementById('data').value || '{}');
+    const fileInput = document.getElementById('file');
+    const file = fileInput.files[0];  // Get the selected file
+    // const auth = JSON.parse(document.getElementById('auth').value || '{}');
+    const authType = document.getElementById('auth-type').value;
+    const authValue = document.getElementById('auth-value').value;
+    // Create a FormData object to append the file and other data
+    const formData = new FormData();
+    formData.append('url', url);
+    formData.append('method', method);
+    formData.append('headers', JSON.stringify(headers));
+    formData.append('params', JSON.stringify(params));
+    formData.append('data', JSON.stringify(data));
+    formData.append('file', file);  // Append the file to the FormData
+    // formData.append('auth', JSON.stringify(auth));
+    formData.append('auth', JSON.stringify({ [authType]: authValue }));
+
+    // Configure the fetch request options
+    const requestOptions = {
+        method: 'POST',
+        body: formData,
+        redirect: 'follow'
+    };
+
+    // Send the request
+    fetch(pythonServiceUrl, requestOptions)
+        .then(response => response.json())
+        .then(data => {
+            document.getElementById('response-content').textContent = JSON.stringify(data, null, 2);
+        })
+        .catch(error => {
+            document.getElementById('response-content').textContent = 'Error: ' + error.message;
+        });
+}
+
+</script>
+
+</body>
+</html>

@@ -1,0 +1,11 @@
+docker build -t request_builder:v2 .
+
+docker run -p 8080:80 request_builder:v2
+
+docker tag request_builder:v2 irtiza17/request_builder:v2
+
+docker push irtiza17/request_builder:v2
+
+docker start <container_id_or_name>
+
+docker start strange_merkle
